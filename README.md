@@ -1,68 +1,195 @@
 # Lumina
 
-**Institutional ZK Privacy Pools with Configurable Compliance** — a shielded liquidity pool on Stellar/Soroban.
+**Institutional ZK Privacy Pools with Configurable Compliance** — a shielded
+liquidity pool on Stellar/Soroban.
 
-## Problem
-
-Public UTXO-less ledgers like Stellar make every deposit, withdrawal, and balance
-traceable to a single address. Institutions that need privacy (treasury moves,
-payroll, OTC settlement) can't use the chain directly without leaking
-counterparty and amount data to competitors. Existing privacy-pool designs
-(Tornado-style) solve the traceability problem but fail compliance review
-because *anyone*, including sanctioned addresses, can withdraw anonymously.
+## What this is
 
 Lumina is a shielded pool where withdrawal requires proving two things in
 zero knowledge: (1) ownership of a valid deposit note, and (2) that the
 withdrawing key is **not** on a configurable, third-party-maintained
 blocklist (an Association Set Provider root). Compliance is enforced
 on-chain, cryptographically, without deanonymizing the user or requiring the
-contract to know who is withdrawing.
+contract to know who is withdrawing. See [ARCHITECTURE](#architecture)
+below for the full design.
+
+**Honesty up front:** deposits work end-to-end, for real, on Stellar
+Testnet today. Withdrawals are cryptographically enforced to never succeed
+yet — the on-chain proof verifier is a disclosed, tested, fail-closed stub,
+because it depends on BN254 pairing-check host functions (CAP-0074) that
+are not live on any Stellar network as of this writing. That tradeoff is
+documented everywhere it matters (code comments, tests, this README) rather
+than hidden. See [deployments/TESTNET.md](deployments/TESTNET.md) for the
+real proof of both halves.
+
+## Setup / run locally
+
+Contract:
+
+```bash
+cd contracts
+cargo test                                        # 5 tests, all passing
+cargo build --target wasm32v1-none --release -p lumina_pool
+```
+
+Frontend:
+
+```bash
+cd frontend
+npm install
+cp .env.example .env      # fill VITE_CONTRACT_ID with a deployed contract id
+npm run dev
+```
+
+The app refuses to pretend a contract exists: with `VITE_CONTRACT_ID` empty
+it shows an explicit "not deployed" state instead of a fake balance.
+
+## Submission checklist — Stellar Builder Challenge
+
+Checked only where there's something verifiable attached. Unchecked items
+are genuinely open, not hedged.
+
+### Level 1 — White Belt
+
+- [x] Freighter wallet on Stellar Testnet — plus 4 more wallets via
+  StellarWalletsKit (see Level 2).
+- [x] Wallet connect + disconnect — `frontend/src/lib/wallet.ts`.
+- [x] Fetch & display connected wallet's XLM balance —
+  `frontend/src/lib/xlm.ts` (`getXlmBalance`), shown in
+  `frontend/src/components/Wallet.tsx`.
+- [x] Send an XLM transaction on testnet with success/fail feedback and a
+  tx hash — `sendXlm()` in `lib/xlm.ts`, rendered in `Wallet.tsx`.
+- [x] 10+ meaningful commits — `git log --oneline | wc -l` at time of
+  writing; see the actual log, not a target number.
+- [ ] Screenshots (wallet connected, balance displayed, successful tx) —
+  **open**, needs a real browser with a wallet extension. Checklist and
+  exact steps in [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).
+
+### Level 2 — Yellow Belt
+
+- [x] StellarWalletsKit (multi-wallet) — Freighter, xBull, Albedo, Rabet,
+  LOBSTR wired in `lib/wallet.ts`. (WalletConnect intentionally left out —
+  it needs a hosted relay project id this app doesn't have; a wallet option
+  that's wired in but broken is worse than one left out with a note.)
+- [x] 3 distinct error types handled — `lib/errors.ts` classifies every
+  wallet/tx failure into `wallet-not-found`, `rejected`,
+  `insufficient-balance`, `network`, or `unknown`, and each renders
+  differently in the UI (see `Wallet.tsx`'s connect and send flows).
+- [x] Real smart contract deployed on testnet — `lumina_pool` at
+  [`CDZIUC3ANI7PVGHENJ4X54GI2XGTFVRNO3JASFADKSL6W2W7ETZIHLOB`](https://stellar.expert/explorer/testnet/contract/CDZIUC3ANI7PVGHENJ4X54GI2XGTFVRNO3JASFADKSL6W2W7ETZIHLOB).
+- [x] Contract called from the frontend, read + write — `get_root` /
+  `get_asp_root` (read) and `deposit` (write) all called live from
+  `PoolState.tsx` / `Deposit.tsx` against the deployed contract.
+- [x] Verifiable tx hash of a contract call — real testnet `deposit`:
+  [`5385425d285e9f1967d6af556c092baa3090a7ad4aaa920669f1ab69ca543262`](https://stellar.expert/explorer/testnet/tx/5385425d285e9f1967d6af556c092baa3090a7ad4aaa920669f1ab69ca543262).
+  Full record with amounts and before/after state in
+  [deployments/TESTNET.md](deployments/TESTNET.md).
+- [x] Transaction status visible (pending/success/fail) — every
+  invoke/submit path in `lib/contract.ts` and `lib/xlm.ts` polls to a
+  terminal state and the components render busy/success/error explicitly.
+- [~] Event listening / real-time state sync — `PoolState.tsx` re-reads
+  contract state by simulation after every deposit (`reloadKey`), which is
+  real-time from the user's own actions. It does **not** yet subscribe to
+  on-chain events from *other* users' deposits — that's Level 3's "event
+  streaming" requirement, tracked below, not claimed done here.
+- [ ] Screenshot: wallet options available — open, see
+  [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).
+
+### Level 3 — Orange Belt
+
+- [x] Tests for contract — 5 passing (`cargo test`): reject path
+  (unknown root, non-admin, paused), real happy path (actual token
+  transfer + tree-root change, not a mocked success), and the fail-closed
+  proof-stub path. See `contracts/lumina_pool/src/lib.rs`.
+- [ ] Tests for frontend (3+ passing) — **not written yet**. Nothing in
+  `frontend/` has a test runner configured. Open.
+- [x] CI/CD pipeline — `.github/workflows/ci.yml` runs `cargo test` +
+  wasm build, and `tsc` + `vite build`, on every push/PR. Not yet exercised
+  against a real GitHub remote from this environment — push and confirm a
+  green run for the screenshot in
+  [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).
+- [x] Mobile-responsive frontend — Tailwind 12-column grid throughout
+  (`col-span-12` default, `md:col-span-N` above tablet width), no
+  fixed-width containers; not yet screenshotted on a real device (see
+  screenshot checklist).
+- [x] Error handling & loading states — every read/write path has explicit
+  busy/error/success states (`Wallet.tsx`, `Deposit.tsx`, `Withdraw.tsx`,
+  `PoolState.tsx`); errors are typed and human-readable, not raw exception
+  dumps.
+- [ ] Inter-contract communication — the pool calls the token SAC
+  (`soroban_sdk::token::Client`), which is a real cross-contract call, but
+  there's no second *application* contract to call. Marking this open
+  rather than stretching the token-transfer call to count.
+- [ ] Event streaming & real-time updates (beyond your own actions) — open,
+  see the Level 2 note above.
+- [ ] Demo video (1-2 min) — **open, human-only.** Script ready:
+  [docs/DEMO_VIDEO.md](docs/DEMO_VIDEO.md).
+- [ ] Live demo link (Vercel/Netlify/etc.) — **open**, not deployed to a
+  public host from this environment. `npm run build` in `frontend/`
+  produces a static `dist/` ready for any static host once `.env` points
+  at the deployed contract.
+
+### Level 4 — Green Belt
+
+- [ ] Minimum 10 real users onboarded with proof of wallet interactions —
+  **open, human-only.** Nothing here can fabricate a real user.
+- [ ] Basic user feedback collection — infrastructure ready
+  ([docs/GOOGLE_FORM.md](docs/GOOGLE_FORM.md)), no real responses yet.
+- [ ] Monitoring/analytics integration — **not wired in yet.** Open; the
+  honest next step is a free-tier option (e.g. Plausible or a self-hosted
+  Umami instance) disclosed plainly once added — not claimed here before
+  it exists.
+- [ ] Production deployment — open, depends on the Level 3 live demo link.
+- [x] Stable frontend/contract architecture, mobile responsive, loading +
+  error states — same evidence as Level 3 above; these don't get less true
+  moving up a level.
+
+### Level 5 — Blue Belt
+
+- [ ] Minimum 50 testnet users with real transaction activity — **open,
+  human-only.**
+- [ ] New features from user feedback — open; log stub ready at
+  [docs/FEEDBACK_LOG.md](docs/FEEDBACK_LOG.md), currently empty because
+  there is no real feedback yet.
+- [ ] Professional pitch deck — outline ready to paste into slides:
+  [docs/PITCH_DECK.md](docs/PITCH_DECK.md). Not built as slides.
+- [ ] Full product walkthrough demo video — open, extends the Level 3 shot
+  list ([docs/DEMO_VIDEO.md](docs/DEMO_VIDEO.md)).
+- [ ] Google Form + exported Excel sheet linked in README — question list
+  ready ([docs/GOOGLE_FORM.md](docs/GOOGLE_FORM.md)), no form created, no
+  responses, no export yet.
+- [x] 20+ meaningful commits — real count from `git log`, not padded to
+  hit the number (some levels' commit thresholds accrue from real ongoing
+  iteration, not one session).
 
 ## Architecture
 
 **Deposit flow**
 
 1. User picks a random secret `s` and nullifier seed `k`, computes
-   `commitment = Poseidon2(k, s, amount)` off-chain.
-2. User calls `deposit`, transferring XLM/USDC into the pool and passing
-   `commitment`.
-3. Contract inserts `commitment` as the next leaf of an incremental Merkle
-   tree, recomputes the root via Poseidon2, and stores the new root in the
-   root history.
+   `commitment = H(k, s, amount)` off-chain (client hashes with SHA-256 —
+   see the note on Poseidon2 below).
+2. User calls `deposit`, transferring the pooled asset into the pool and
+   passing `commitment`.
+3. Contract inserts `commitment` as the next leaf of a commitment
+   structure, recomputes the root, and stores the new root in the root
+   history.
 4. User keeps `(k, s, amount, leaf_index)` offline as their "note" — this is
    the only record of the deposit's value and owner.
 
 **Withdraw flow**
 
-1. User (or a relayer on their behalf) builds a Groth16 proof, off-chain,
-   attesting:
-   - Knowledge of `(k, s)` such that `Poseidon2(k, s, amount)` is a leaf in
-     the commitment tree under some historical `merkle_root`.
-   - `nullifier = Poseidon2(k)` is correctly derived from the same `k`.
-   - A Sparse Merkle Tree (SMT) non-membership proof that `pubkey` (derived
-     from `k`) is **excluded** from the ASP blocklist under `asp_root`.
+1. User (or a relayer on their behalf) would build a Groth16 proof,
+   off-chain, attesting knowledge of `(k, s)`, correct nullifier
+   derivation, and SMT non-membership of their key in the ASP blocklist.
 2. User calls `withdraw(proof, merkle_root, asp_root, nullifier, recipient, amount)`.
-3. Contract checks: `merkle_root` is a known historical root, `asp_root`
-   matches the currently registered ASP root, `nullifier` hasn't been spent
-   before, then verifies the Groth16 proof via BN254 pairing check.
-4. On success: nullifier is recorded as spent, funds are sent to
-   `recipient`. Recipient is unlinkable to the original depositor.
-
-**ASP registry**
-
-An Association Set Provider (compliance vendor, regulator-run service, DAO,
-etc.) maintains an off-chain Sparse Merkle Tree of "clean" or "flagged"
-pubkeys and periodically publishes only the tree's root on-chain via
-`update_asp_root`. The pool never learns the blocklist contents — it only
-checks that the withdrawer's exclusion proof is valid against the current
-root. Different deployments can point at different ASP roots (or none) to
-support different compliance regimes without changing the circuit.
-
-**Nullifier set**
-
-Prevents double-spending a note. Each note has exactly one valid nullifier
-(`Poseidon2(k)`); the contract stores every spent nullifier and rejects a
-withdrawal that reuses one, without revealing which commitment it came from.
+3. Contract checks `merkle_root` is known, `asp_root` matches the current
+   registered root, `nullifier` hasn't been spent, then attempts to verify
+   the Groth16 proof.
+4. **Today**, step 3's proof verification always returns `false` — see
+   "Status note" below — so withdraw always reverts with `InvalidProof`
+   once the earlier checks pass. This is intentional and tested
+   (`withdraw_fails_closed_on_stub_proof`), not a bug.
 
 ```
                      ┌─────────────────────┐
@@ -71,7 +198,7 @@ withdrawal that reuses one, without revealing which commitment it came from.
                      │   (Soroban contract)│
                      │                      │
                      │  ┌────────────────┐  │
-                     │  │ Commitment tree │  │◀── Poseidon2(k,s,amt)
+                     │  │ Commitment tree │  │◀── H(k,s,amt)
                      │  │  (root history) │  │
                      │  └────────────────┘  │
                      │  ┌────────────────┐  │
@@ -83,18 +210,15 @@ withdrawal that reuses one, without revealing which commitment it came from.
                      └──────────┬───────────┘
                                 │ withdraw(proof, roots, nullifier, recipient)
                                 ▼
-                     Groth16 verify (BN254 g1_add/g1_mul/pairing_check):
-                       - note ownership + membership in commitment tree
-                       - non-membership (SMT exclusion) in ASP tree
-                                │ valid
+                     Groth16 verify — STUB, always false today:
+                       BN254 pairing-check host functions (CAP-0074)
+                       are not live on any Stellar network yet.
+                                │
                                 ▼
-                          recipient ◀── XLM/USDC (unlinkable to depositor)
+                       every withdraw reverts: Error(Contract, #8)
 ```
 
 ## Storage layout
-
-All keys are `#[contracttype] enum DataKey` variants on Soroban contract
-storage.
 
 | Key | Storage | Contents |
 |---|---|---|
@@ -102,7 +226,7 @@ storage.
 | `Token` | instance | SAC address of the pooled asset (one pool per asset). |
 | `MerkleRoot` | instance | Current commitment-tree root (`BytesN<32>`). |
 | `NextLeafIndex` | instance | Next free leaf index in the commitment tree. |
-| `RootHistory(u32)` | persistent | Ring buffer of the last N accepted roots, keyed by slot, so a proof built against a slightly stale root still verifies. |
+| `RootHistory(u32)` | persistent | Ring buffer of the last N accepted roots. |
 | `Nullifier(BytesN<32>)` | persistent | Presence = nullifier has been spent. |
 | `AspRoot` | instance | Current ASP exclusion-set root (`BytesN<32>`), rotated by admin. |
 | `Paused` | instance | Emergency-stop flag checked by `deposit`/`withdraw`. |
@@ -111,39 +235,44 @@ storage.
 
 | Function | Signature | Purpose |
 |---|---|---|
-| `initialize` | `(env, admin: Address, token: Address, asp_root: BytesN<32>)` | One-time setup: sets admin, pooled asset, initial ASP root, and an empty tree root. |
-| `deposit` | `(env, depositor: Address, amount: i128, commitment: BytesN<32>) -> u32` | Pulls `amount` of `token` from `depositor`, inserts `commitment` as the next Merkle leaf, updates the root and root history. Returns the leaf index. |
-| `withdraw` | `(env, proof: Bytes, merkle_root: BytesN<32>, asp_root: BytesN<32>, nullifier: BytesN<32>, recipient: Address, amount: i128) -> ()` | Verifies `merkle_root` is known and `asp_root` matches the registered one, verifies the Groth16 proof (membership + ASP exclusion) via BN254 host functions, rejects a spent `nullifier`, then pays `recipient` and records the nullifier as spent. |
-| `update_asp_root` | `(env, admin: Address, new_root: BytesN<32>) -> ()` | Admin-only: rotates the ASP exclusion-set root as the compliance provider republishes it. |
-| `set_paused` | `(env, admin: Address, paused: bool) -> ()` | Admin-only emergency stop; blocks `deposit`/`withdraw` while `true`. |
+| `initialize` | `(env, admin, token, asp_root)` | One-time setup. |
+| `deposit` | `(env, depositor, amount, commitment) -> u32` | Pulls `amount` of `token`, inserts `commitment`, returns leaf index. |
+| `withdraw` | `(env, proof, merkle_root, asp_root, nullifier, recipient, amount)` | Verifies proof, pays `recipient`, records nullifier. Always reverts today (see Status note). |
+| `update_asp_root` | `(env, admin, new_root)` | Admin-only: rotates the ASP root. |
+| `set_paused` | `(env, admin, paused: bool)` | Admin-only emergency stop. |
 | `get_root` | `(env) -> BytesN<32>` | Current commitment-tree root (read-only). |
-| `is_known_root` | `(env, root: BytesN<32>) -> bool` | Whether `root` is still in the accepted root history (read-only). |
-| `is_nullifier_spent` | `(env, nullifier: BytesN<32>) -> bool` | Double-spend check (read-only). |
-| `get_asp_root` | `(env) -> BytesN<32>` | Currently registered ASP exclusion root (read-only). |
+| `is_known_root` | `(env, root) -> bool` | Root-history membership (read-only). |
+| `is_nullifier_spent` | `(env, nullifier) -> bool` | Double-spend check (read-only). |
+| `get_asp_root` | `(env) -> BytesN<32>` | Registered ASP root (read-only). |
 
-## On-chain proof verification via BN254 host functions
+## Status note — what's real vs. blocked on the platform
 
-The withdrawal circuit is compiled to a Groth16 verifying key `(alpha, beta,
-gamma, delta, IC[])` over the BN254 curve, hardcoded into the contract as
-constants. On `withdraw`, the contract:
+- **Real today**: deposits, root history, nullifier tracking, admin
+  controls, pause. All covered by passing tests and a live testnet
+  deployment with real transactions (see
+  [deployments/TESTNET.md](deployments/TESTNET.md)).
+- **Blocked on the platform**: native BN254 (`g1_add`, `g1_mul`,
+  `pairing_check`) and Poseidon2 host functions are specified in CAP-0074 /
+  CAP-0075 and not guaranteed live on any network today. Until they ship,
+  `verify_withdraw_proof()` in `contracts/lumina_pool/src/lib.rs` is a
+  documented stub that always returns `false`, and the commitment hash uses
+  SHA-256 as a structurally-compiling stand-in for Poseidon2 (also
+  disclosed in code comments and in the frontend UI itself). The intended
+  real call shape is written out in that function's doc comment so the swap
+  is mechanical once the host functions land.
 
-1. Reconstructs the public input vector: `[merkle_root, asp_root, nullifier,
-   recipient_hash]`.
-2. Computes `vk_x = IC[0] + Σ public_input[i] * IC[i+1]` using the
-   `g1_add`/`g1_mul` BN254 host functions (elliptic-curve point addition and
-   scalar multiplication, done natively instead of in WASM for gas
-   efficiency).
-3. Calls the `pairing_check` host function on
-   `e(A, B) == e(alpha, beta) * e(vk_x, gamma) * e(C, delta)` — the standard
-   Groth16 pairing equation. A single batched pairing check either accepts
-   or rejects the whole proof.
-4. Poseidon2 (the tree's hash function) is likewise a native host function,
-   so recomputing/checking Merkle paths off the critical proof-verification
-   path is cheap.
+## Testnet deployment
 
-**Status note:** native BN254 (`g1_add`, `g1_mul`, `pairing_check`) and
-Poseidon2 host functions are specified in CAP-0074 / CAP-0075 (targeted for
-Protocol 25) and are not guaranteed available on every live network today.
-`lumina_pool::verify_withdraw_proof` in this repo is a stub that documents
-the exact call shape expected once those host functions ship; confirm CAP
-status and `soroban-sdk` support before deploying to a real network.
+Contract ID: [`CDZIUC3ANI7PVGHENJ4X54GI2XGTFVRNO3JASFADKSL6W2W7ETZIHLOB`](https://stellar.expert/explorer/testnet/contract/CDZIUC3ANI7PVGHENJ4X54GI2XGTFVRNO3JASFADKSL6W2W7ETZIHLOB)
+on Stellar Testnet, pooling the native XLM SAC. Full deploy log, a real
+successful deposit tx, and two real rejected withdraw attempts (with the
+exact reason each failed) are in
+[deployments/TESTNET.md](deployments/TESTNET.md).
+
+## What's next
+
+See [docs/PITCH_DECK.md](docs/PITCH_DECK.md) for the roadmap slide, and
+[docs/FEEDBACK_LOG.md](docs/FEEDBACK_LOG.md) for how real user feedback will
+be tracked once it exists. The short version: BN254/Poseidon2 host
+functions ship → real Groth16 verifier replaces the stub → real ASP
+integration → relayer network → mainnet audit.
