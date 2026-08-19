@@ -38,6 +38,7 @@ Frontend:
 cd frontend
 npm install
 cp .env.example .env      # fill VITE_CONTRACT_ID with a deployed contract id
+npm test                                          # 12 tests, all passing
 npm run dev
 ```
 
@@ -101,10 +102,12 @@ are genuinely open, not hedged.
   (unknown root, non-admin, paused), real happy path (actual token
   transfer + tree-root change, not a mocked success), and the fail-closed
   proof-stub path. See `contracts/lumina_pool/src/lib.rs`.
-- [ ] Tests for frontend (3+ passing) — **not written yet**. Nothing in
-  `frontend/` has a test runner configured. Open.
+- [x] Tests for frontend (3+ passing) — 12 passing (`npm test` in
+  `frontend/`, Vitest): `lib/contract.test.ts` (stroops conversion, hex
+  round-trip, reject-path on garbage input) and `lib/errors.test.ts`
+  (each error classification actually returns the right kind).
 - [x] CI/CD pipeline — `.github/workflows/ci.yml` runs `cargo test` +
-  wasm build, and `tsc` + `vite build`, on every push/PR. Not yet exercised
+  wasm build, and `npm test` + `tsc` + `vite build`, on every push/PR. Not yet exercised
   against a real GitHub remote from this environment — push and confirm a
   green run for the screenshot in
   [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).
