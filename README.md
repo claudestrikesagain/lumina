@@ -60,8 +60,8 @@ are genuinely open, not hedged.
   `frontend/src/components/Wallet.tsx`.
 - [x] Send an XLM transaction on testnet with success/fail feedback and a
   tx hash — `sendXlm()` in `lib/xlm.ts`, rendered in `Wallet.tsx`.
-- [x] 10+ meaningful commits — `git log --oneline | wc -l` at time of
-  writing; see the actual log, not a target number.
+- [x] 10+ meaningful commits — 10 as of this writing (`git log --oneline`),
+  each a real, distinct change (not padding); see the log itself.
 - [ ] Screenshots (wallet connected, balance displayed, successful tx) —
   **open**, needs a real browser with a wallet extension. Checklist and
   exact steps in [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).
@@ -146,6 +146,8 @@ are genuinely open, not hedged.
 - [x] Stable frontend/contract architecture, mobile responsive, loading +
   error states — same evidence as Level 3 above; these don't get less true
   moving up a level.
+- [ ] 15+ meaningful commits — 10 as of this writing; genuinely short of the
+  Level 4 threshold, not rounded up.
 
 ### Level 5 — Blue Belt
 
@@ -161,9 +163,9 @@ are genuinely open, not hedged.
 - [ ] Google Form + exported Excel sheet linked in README — question list
   ready ([docs/GOOGLE_FORM.md](docs/GOOGLE_FORM.md)), no form created, no
   responses, no export yet.
-- [x] 20+ meaningful commits — real count from `git log`, not padded to
-  hit the number (some levels' commit thresholds accrue from real ongoing
-  iteration, not one session).
+- [ ] 20+ meaningful commits — 10 as of this writing; short of the Level 5
+  threshold. Real ongoing iteration (the items above) will accrue more —
+  not padded to hit the number in one session.
 
 ## Architecture
 
