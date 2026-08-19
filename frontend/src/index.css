@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background-color: theme("colors.paper");
+  }
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    font-size: 15px;
+  }
+  ::selection {
+    background: theme("colors.oxbloodFaint");
+  }
+  :focus-visible {
+    outline: 2px solid theme("colors.oxblood");
+    outline-offset: 2px;
+  }
+  input,
+  textarea {
+    @apply bg-paperEdge border border-rule px-3 py-2 text-ink font-mono text-[13px] w-full;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-inkFaint;
+  }
+  input:disabled,
+  textarea:disabled {
+    @apply bg-paperDeep text-inkFaint;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply text-micro uppercase tracking-[0.16em] text-inkFaint font-medium;
+  }
+  .rule-top {
+    @apply border-t border-rule;
+  }
+  .btn {
+    @apply border border-ink px-4 py-2 text-[13px] uppercase tracking-[0.1em] font-medium
+           text-ink bg-transparent transition-opacity duration-200
+           hover:opacity-60 disabled:opacity-30 disabled:cursor-not-allowed;
+  }
+  .btn-solid {
+    @apply bg-ink text-paper border-ink;
+  }
+  .ledger th {
+    @apply text-micro uppercase tracking-[0.14em] text-inkFaint font-medium py-2
+           border-b border-rule text-left align-bottom;
+  }
+  .ledger td {
+    @apply py-2 border-b border-ruleFaint align-top text-[13px];
+  }
+  .num {
+    @apply font-mono text-right tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

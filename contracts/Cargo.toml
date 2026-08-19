@@ -1,0 +1,22 @@
+[workspace]
+resolver = "2"
+members = ["lumina_pool"]
+
+[workspace.dependencies]
+# ponytail: pinned exact — 22.0.11 pulls soroban-env-host 22.1.3, which fails to
+# build against ed25519-dalek 3.0.0. Unpin once upstream bounds are fixed.
+soroban-sdk = "=22.0.1"
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true
+
+[profile.release-with-logs]
+inherits = "release"
+debug-assertions = true
