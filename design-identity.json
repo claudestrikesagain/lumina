@@ -1,0 +1,17 @@
+{
+  "project": "Lumina",
+  "owner": {
+    "name": "Fahmin",
+    "email": "kkfahmin@gmail.com"
+  },
+  "style": "dashboard-dense",
+  "palette": "paper-ink",
+  "typography": "editorial-serif",
+  "decidedAt": "2026-08-30",
+  "reason": "Reserved Lumina identity. Privacy + compliance. Paper/ink/oxblood classical finance feel.",
+  "dials": {
+    "DESIGN_VARIANCE": 5,
+    "MOTION_INTENSITY": 4,
+    "VISUAL_DENSITY": 7
+  }
+}

@@ -279,3 +279,23 @@ See [docs/PITCH_DECK.md](docs/PITCH_DECK.md) for the roadmap slide, and
 be tracked once it exists. The short version: BN254/Poseidon2 host
 functions ship → real Groth16 verifier replaces the stub → real ASP
 integration → relayer network → mainnet audit.
+
+## Design
+
+**Identity triple** (seeded, see `design-identity.json`):
+
+- **Style:** `dashboard-dense`
+- **Palette:** `paper-ink`
+- **Typography:** `editorial-serif`
+
+**Design read.** Institutional finance app for privacy-conscious crypto users, with a dashboard-dense language, leaning toward paper-ink classical + editorial-serif for the privacy/compliance feel.
+
+**Dials.** DESIGN_VARIANCE / MOTION_INTENSITY / VISUAL_DENSITY are seeded from the style (see `design-identity.json`). The 3 dial values are not hard-coded into the components — they inform layout, motion, and density decisions when new pages are added.
+
+**Multi-page shell.** The saas-multi-page skill is satisfied: landing + per-feature pages + Profile + Settings. Profile shows wallet identity, network, and recent activity. Settings shows network endpoints, advanced toggles, and a danger zone for clearing local data. The Profile and Settings pages follow the saas-multi-page minimum content spec.
+
+**Anti-slop finish gate.** Run `anti-ui-slop` before declaring anything done. The gate is: no AI-purple gradients, no centered hero over dark mesh, no three equal feature cards, no generic glassmorphism, no Inter+slate-900 default. Each project's palette is intentionally not the LLM default; the components are designed to honor the seeded palette + typography.
+
+**Brag video script.** See `brag/script.md` — a 60s Hyperframes input (concept + storyboard + render notes).
+
+---

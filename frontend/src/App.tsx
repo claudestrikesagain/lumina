@@ -4,6 +4,8 @@ import { AppShell } from "./components/AppShell";
 import { TourGuide } from "./components/TourGuide";
 import { FeedbackModal } from "./components/FeedbackModal";
 import { LandingPage } from "./pages/LandingPage";
+import { ProfilePage } from './pages/ProfilePage';
+import { SettingsPage } from './pages/SettingsPage';
 import { OverviewPage } from "./pages/OverviewPage";
 import { WalletPage } from "./pages/WalletPage";
 import { DepositPage } from "./pages/DepositPage";
@@ -52,6 +54,8 @@ export default function App() {
             <Route path="/ledger" element={<LedgerPage />} />
             <Route path="/developers" element={<DevelopersPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<LandingPage />} />
           </Routes>
         </AppShell>
