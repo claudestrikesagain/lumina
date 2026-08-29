@@ -7,23 +7,29 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "screenshots": "npm run build && (vite preview > /tmp/lumina-preview.log 2>&1 &) && sleep 3 && node scripts/screenshots.mjs; CODE=$?; pkill -f 'vite preview' 2>/dev/null; exit $CODE"
   },
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "^2.5.0",
     "@stellar/stellar-sdk": "^14.4.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.18.3"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "playwright": "^1.62.1",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.16",
     "typescript": "^5.7.2",
     "vite": "^6.0.7",
     "vitest": "^4.1.11"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.63.1"
   }
 }
