@@ -16,6 +16,7 @@ frontend/.vite/
 frontend/.env
 frontend/.env.*
 !frontend/.env.example
+frontend/screenshots/
 *.pem
 *.key
 
