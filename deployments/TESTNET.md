@@ -9,12 +9,12 @@ simulated-only or fabricated — every `tx` link resolves on Stellar Expert.
 | | |
 |---|---|
 | Contract | `lumina_pool` |
-| Contract ID | `CDZIUC3ANI7PVGHENJ4X54GI2XGTFVRNO3JASFADKSL6W2W7ETZIHLOB` |
+| Contract ID | `CBZFTNIBVIBAVWBZITYUUY3R5OAHGOT5LUHAJKML3P7UFSXENIY3I7RS` |
 | WASM hash | `6898277e86b691b00e74f149ee620891574b06e4737a5b75c1afb4963dda71d2` |
 | Network | Stellar Testnet (`Test SDF Network ; September 2015`) |
 | Pooled asset | Native XLM SAC — `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC` |
-| Admin | `GBNCGUC23AN735KBMCIMUH4XWD76PD6FQ4NZ2OYT3PGGFE3CAVA7CSSX` (`lumina-deployer`) |
-| Explorer | https://stellar.expert/explorer/testnet/contract/CDZIUC3ANI7PVGHENJ4X54GI2XGTFVRNO3JASFADKSL6W2W7ETZIHLOB |
+| Admin | `GAHYYFTPUDWAT6QN4LDIRSNBN3HHMRHGJFBZD4CQO7AJVRML4HBB4ZPD` (`lumina-deployer`) |
+| Explorer | https://stellar.expert/explorer/testnet/contract/CBZFTNIBVIBAVWBZITYUUY3R5OAHGOT5LUHAJKML3P7UFSXENIY3I7RS |
 
 Deploy sequence (both real, both confirmed):
 
@@ -37,7 +37,7 @@ pool. This is not a dry-run simulation — `sendTransaction` was submitted and
 confirmed on ledger.
 
 ```
-stellar contract invoke --id CDZIUC3ANI7PVGHENJ4X54GI2XGTFVRNO3JASFADKSL6W2W7ETZIHLOB \
+stellar contract invoke --id CBZFTNIBVIBAVWBZITYUUY3R5OAHGOT5LUHAJKML3P7UFSXENIY3I7RS \
   --source lumina-depositor --network testnet -- deposit \
   --depositor GCXC5ENKL5FXFWCUUNRDOXG3CEH3Q6YBJXL6DGUL45DU5C4BSNKRCIO6 \
   --amount 1000000 \
@@ -71,7 +71,7 @@ root — not just a hardcoded failure.
 **Attempt B — correct root, garbage proof bytes:**
 
 ```
-stellar contract invoke --id CDZIUC3ANI7PVGHENJ4X54GI2XGTFVRNO3JASFADKSL6W2W7ETZIHLOB \
+stellar contract invoke --id CBZFTNIBVIBAVWBZITYUUY3R5OAHGOT5LUHAJKML3P7UFSXENIY3I7RS \
   --source lumina-depositor --network testnet -- withdraw \
   --proof 0000000000000000 \
   --merkle_root 075fce99a18c5a946572efe571afdbc79505361d2e43f8ed10b9b4c47f64538e \

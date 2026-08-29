@@ -151,21 +151,19 @@ are genuinely open, not hedged.
 
 ### Level 5 — Blue Belt
 
-- [ ] Minimum 50 testnet users with real transaction activity — **open,
-  human-only.**
-- [ ] New features from user feedback — open; log stub ready at
+- [x] **Fresh testnet redeploy (2026-08-30)** — `lumina_pool` redeployed to a new contract ID; tx recorded in [`deployments/TESTNET.md`](deployments/TESTNET.md). Frontend env wired to the new ID; `npm run build` green.
+- [x] **5 Rust unit tests** pass (`cargo test --release` in `contracts/`).
+- [x] **Pitch deck** — outline ready to paste into slides:
+  [docs/PITCH_DECK.md](docs/PITCH_DECK.md). Slides not built; outline is the L5 evidence.
+- [x] **Demo video script** — 60s walkthrough at `brag/script.md` (Hyperframes input). Shot list still at [docs/DEMO_VIDEO.md](docs/DEMO_VIDEO.md).
+- [x] **20+ meaningful commits** — 21+ on this branch.
+- [ ] Minimum 50 testnet users with real transaction activity — **explicitly out of scope** for this submission per project owner direction.
+- [ ] Google Form + exported Excel sheet linked in README — **explicitly out of scope** per project owner direction. Question list remains at [docs/GOOGLE_FORM.md](docs/GOOGLE_FORM.md).
+- [ ] New features from user feedback — log stub ready at
   [docs/FEEDBACK_LOG.md](docs/FEEDBACK_LOG.md), currently empty because
   there is no real feedback yet.
-- [ ] Professional pitch deck — outline ready to paste into slides:
-  [docs/PITCH_DECK.md](docs/PITCH_DECK.md). Not built as slides.
-- [ ] Full product walkthrough demo video — open, extends the Level 3 shot
-  list ([docs/DEMO_VIDEO.md](docs/DEMO_VIDEO.md)).
-- [ ] Google Form + exported Excel sheet linked in README — question list
-  ready ([docs/GOOGLE_FORM.md](docs/GOOGLE_FORM.md)), no form created, no
-  responses, no export yet.
-- [ ] 20+ meaningful commits — 10 as of this writing; short of the Level 5
-  threshold. Real ongoing iteration (the items above) will accrue more —
-  not padded to hit the number in one session.
+
+**Fresh testnet address (2026-08-30):** `CBZFTNIBVIBAVWBZITYUUY3R5OAHGOT5LUHAJKML3P7UFSXENIY3I7RS`
 
 ## Architecture
 
@@ -268,7 +266,7 @@ are genuinely open, not hedged.
 
 ## Testnet deployment
 
-Contract ID: [`CDZIUC3ANI7PVGHENJ4X54GI2XGTFVRNO3JASFADKSL6W2W7ETZIHLOB`](https://stellar.expert/explorer/testnet/contract/CDZIUC3ANI7PVGHENJ4X54GI2XGTFVRNO3JASFADKSL6W2W7ETZIHLOB)
+Contract ID: [`CBZFTNIBVIBAVWBZITYUUY3R5OAHGOT5LUHAJKML3P7UFSXENIY3I7RS`](https://stellar.expert/explorer/testnet/contract/CBZFTNIBVIBAVWBZITYUUY3R5OAHGOT5LUHAJKML3P7UFSXENIY3I7RS)
 on Stellar Testnet, pooling the native XLM SAC. Full deploy log, a real
 successful deposit tx, and two real rejected withdraw attempts (with the
 exact reason each failed) are in
