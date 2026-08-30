@@ -10,4 +10,7 @@ export default defineConfig({
     port: 4173,
     strictPort: true,
   },
+  optimizeDeps: {
+    include: ["@creit.tech/stellar-wallets-kit"],
+  },
 });

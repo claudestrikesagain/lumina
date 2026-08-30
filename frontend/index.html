@@ -12,6 +12,17 @@
     />
   </head>
   <body>
+    <!-- Node-globals polyfill for browser bundles that still reference
+         `global`, `process`, `Buffer` (some wallet kits / crypto libs). -->
+    <script>
+      window.global = window.global || window;
+      window.process = window.process || { env: {}, browser: true, version: '' };
+      window.Buffer = window.Buffer || (function () {
+        var b = {};
+        b.isBuffer = function () { return false; };
+        return b;
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
