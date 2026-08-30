@@ -46,7 +46,7 @@
 
 **VO:** "Live on testnet. Deposit, watch the tree, attempt to withdraw with a stub proof, see the contract reject it cleanly. Privacy + accountability in one contract."
 
-**On-screen text:** *"`CBZFTNIBVIBAVWBZITYUUY3R5OAHGOT5LUHAJKML3P7UFSXENIY3I7RS`"*
+**On-screen text:** *"`CA2WN724TV7ID5DVGAAYNEHPQRAAYTKGGKO436R5AKGHGN5ZR6VXJOVE`"*
 
 ---
 

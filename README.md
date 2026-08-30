@@ -163,7 +163,7 @@ are genuinely open, not hedged.
   [docs/FEEDBACK_LOG.md](docs/FEEDBACK_LOG.md), currently empty because
   there is no real feedback yet.
 
-**Fresh testnet address (2026-08-30):** `CBZFTNIBVIBAVWBZITYUUY3R5OAHGOT5LUHAJKML3P7UFSXENIY3I7RS`
+**Fresh testnet address (2026-08-30):** `CA2WN724TV7ID5DVGAAYNEHPQRAAYTKGGKO436R5AKGHGN5ZR6VXJOVE`
 
 ## Architecture
 
@@ -266,7 +266,7 @@ are genuinely open, not hedged.
 
 ## Testnet deployment
 
-Contract ID: [`CBZFTNIBVIBAVWBZITYUUY3R5OAHGOT5LUHAJKML3P7UFSXENIY3I7RS`](https://stellar.expert/explorer/testnet/contract/CBZFTNIBVIBAVWBZITYUUY3R5OAHGOT5LUHAJKML3P7UFSXENIY3I7RS)
+Contract ID: [`CA2WN724TV7ID5DVGAAYNEHPQRAAYTKGGKO436R5AKGHGN5ZR6VXJOVE`](https://stellar.expert/explorer/testnet/contract/CA2WN724TV7ID5DVGAAYNEHPQRAAYTKGGKO436R5AKGHGN5ZR6VXJOVE)
 on Stellar Testnet, pooling the native XLM SAC. Full deploy log, a real
 successful deposit tx, and two real rejected withdraw attempts (with the
 exact reason each failed) are in
