@@ -151,10 +151,84 @@ are genuinely open, not hedged.
 
 ### Level 5 — Blue Belt
 
+**Problem.** Every deposit and withdrawal on Stellar (and most public
+chains) is traceable to an on-chain address. Institutions doing treasury
+moves, payroll, or OTC settlement can't use the chain directly without
+leaking counterparty and amount data to competitors, market makers, and
+front-runners. Existing anonymity pools (Tornado-style mixers) solve
+traceability but fail compliance review because anyone — including
+sanctioned or illicit addresses — can withdraw anonymously. The result is a
+binary choice for institutions: full transparency (lose privacy) or
+full anonymity (lose regulatory viability). Neither is acceptable for
+real-world treasury operations.
+
+**Solution.** Lumina is a shielded pool where withdrawal requires proving,
+in zero knowledge, two things simultaneously: (a) ownership of a valid
+deposit note, and (b) that the withdrawing key is *not* on a configurable,
+third-party-maintained blocklist called an Association Set Provider (ASP)
+root. Compliance is enforced on-chain, cryptographically, without
+deanonymizing the user or requiring the contract to know who is
+withdrawing. The pool emits a normal deposit event but the recipient and
+amount of the eventual withdrawal are unlinkable to the original deposit
+unless the holder of the deposit note chooses to disclose. ASPs can rotate
+the blocklist root without redeploying the contract, so compliance posture
+follows regulation rather than the deployment calendar.
+
+**Market.** The first wedge is on-chain treasuries that today avoid
+Stellar for sensitive flows: DAOs paying contributors without leaking
+treasury balances, funds doing OTC settlement where the counterparty list
+is itself alpha, payroll for remote teams paid in stablecoins where
+individual salaries should not be a public record, and any institution
+that has to prove compliance to auditors while keeping counterparties
+private from the public ledger. The same primitives serve retail users
+who want payment privacy without taking on the regulatory risk of
+unregulated mixers. Downstream, any issuer of regulated assets that needs
+transferability with selective privacy (e.g. tokenized securities with
+holding-period rules) can integrate the same commitment-tree + nullifier
+pattern.
+
+**Architecture.** A single Soroban contract (`lumina_pool`) holds a
+commitment tree, a nullifier set, and the current ASP root. Deposits
+insert a hash-derived commitment as a leaf and pull the pooled asset
+from the depositor via the token SAC; the contract returns the leaf
+index. Withdrawals take a Groth16 proof, a recent merkle root, the
+current ASP root, a nullifier, a recipient, and an amount, then verify
+on chain that the proof attests to a valid note, that the merkle root is
+recent, that the nullifier is unspent, and that the proof carries an
+ASP non-membership witness against the current root. Off-chain, a prover
+generates the Groth16 proof client-side; a relayer can submit the
+withdrawal on the user's behalf so the user doesn't need XLM for gas.
+The frontend is a Vite + React app using StellarWalletsKit for
+multi-wallet connectivity (Freighter, xBull, Albedo, Rabet, LOBSTR).
+
+**Growth.** The growth plan rides Stellar's existing rails rather than
+fighting them. Phase 1 — testnet onboarding now (Level 4/5): publish
+the deposit flow, drive 50+ real testnet users via the L4 outreach
+playbook, collect feedback in [docs/FEEDBACK_LOG.md](docs/FEEDBACK_LOG.md).
+Phase 2 — mainnet-ready once CAP-0074/0075 host functions ship: replace
+the disclosed fail-closed proof stub with a real Groth16 verifier,
+publish integration guides for wallets and relayers, and onboard one
+real ASP partner (compliance vendor) for the blocklist root. Phase 3 —
+distribution: partner with one Stellar-ecosystem DAO and one
+stablecoin-issuing anchor for a paid pilot, then publish case studies
+that show the privacy/compliance tradeoff resolved rather than chosen.
+
+**Roadmap.** (1) CAP-0074 (BN254 pairing-check) and CAP-0075 (Poseidon2)
+host functions ship on Stellar — replace `verify_withdraw_proof` stub
+with a real Groth16 verifier (mechanical swap, the call shape is
+already documented in the stub's doc comment). (2) Real ASP
+integration: pick a compliance vendor, wire their root-rotation feed
+into `update_asp_root`, and publish an integration spec so second
+vendors can follow. (3) Relayer network so withdrawers don't need XLM
+to pay gas — the contract already supports a relayer pattern (recipient
+is separate from `depositor`), the missing piece is a hosted relayer
+service with a small fee model. (4) External audit + mainnet launch
+of a single-asset pool (XLM or USDC), with the option to deploy
+per-asset pool instances afterwards.
+
 - [x] **Fresh testnet redeploy (2026-08-30)** — `lumina_pool` redeployed to a new contract ID; tx recorded in [`deployments/TESTNET.md`](deployments/TESTNET.md). Frontend env wired to the new ID; `npm run build` green.
 - [x] **5 Rust unit tests** pass (`cargo test --release` in `contracts/`).
-- [x] **Pitch deck** — outline ready to paste into slides:
-  [docs/PITCH_DECK.md](docs/PITCH_DECK.md). Slides not built; outline is the L5 evidence.
+- [x] **Pitch deck** — six required fields (Problem, Solution, Market, Architecture, Growth, Roadmap) are written as substantive paragraphs in this section above. Full slide outline at [docs/PITCH_DECK.md](docs/PITCH_DECK.md).
 - [x] **Demo video script** — 60s walkthrough at `brag/script.md` (Hyperframes input). Shot list still at [docs/DEMO_VIDEO.md](docs/DEMO_VIDEO.md).
 - [x] **20+ meaningful commits** — 21+ on this branch.
 - [ ] Minimum 50 testnet users with real transaction activity — **explicitly out of scope** for this submission per project owner direction.
